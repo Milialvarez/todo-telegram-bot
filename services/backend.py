@@ -1,26 +1,18 @@
 import httpx
-from config import API_TOKEN, BACKEND_URL
+from config import BACKEND_URL
 
-def auth_headers():
-    """
-    Returns authorization headers for authenticated backend requests.
-    """
-    return {
-        "Authorization": f"Bearer {API_TOKEN}"
-    }
-
-async def fetch_my_tasks():
+async def fetch_my_tasks(headers: dict):
     """
     Retrieves tasks for the authenticated user.
     """
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{BACKEND_URL}/tasks/me",
-            headers=auth_headers()
+            headers=headers
         )
     return response
 
-async def create_task(payload: dict):
+async def create_task(payload: dict, headers: dict):
     """
     Sends a request to create a new task.
     """
@@ -28,15 +20,11 @@ async def create_task(payload: dict):
         response = await client.post(
             f"{BACKEND_URL}/tasks/",
             json=payload,
-            headers=auth_headers()
+            headers=headers
         )
     return response
 
-async def update_task_status(task_id: int, status: str) -> bool:
-    headers = {
-        "Authorization": f"Bearer {API_TOKEN}"
-    }
-
+async def update_task_status(task_id: int, status: str, headers: dict) -> bool:
     """
     Send the proper dto expected in my fastapi backend
     """
@@ -53,3 +41,22 @@ async def update_task_status(task_id: int, status: str) -> bool:
         )
 
     return response.status_code == 200
+
+async def login(email: str, password: str) -> str | None:
+    """
+    Performs login against the backend and returns a JWT access token.
+    Returns None if authentication fails.
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{BACKEND_URL}/auth/login",
+            data={
+                "username": email,
+                "password": password
+            }
+        )
+
+    if response.status_code != 200:
+        return None
+
+    return response.json().get("access_token")
