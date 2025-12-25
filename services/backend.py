@@ -31,3 +31,25 @@ async def create_task(payload: dict):
             headers=auth_headers()
         )
     return response
+
+async def update_task_status(task_id: int, status: str) -> bool:
+    headers = {
+        "Authorization": f"Bearer {API_TOKEN}"
+    }
+
+    """
+    Send the proper dto expected in my fastapi backend
+    """
+    payload = {
+        "task_id": task_id,
+        "status": status
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.put(
+            f"{BACKEND_URL}/tasks/",
+            json=payload,
+            headers=headers
+        )
+
+    return response.status_code == 200
