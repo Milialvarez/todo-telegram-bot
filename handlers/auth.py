@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from services.backend import login
+from services.backend import login, register
 from sessions import user_sessions
 
 
@@ -41,3 +41,34 @@ async def logout_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("👋 Logged out successfully")
     else:
         await update.message.reply_text("You are not logged in")
+
+async def register_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Registers a new user.
+    Usage: /register username email password
+    """
+    if len(context.args) != 3:
+        await update.message.reply_text(
+            "Usage:\n/register username email password"
+        )
+        return
+
+    username, email, password = context.args
+
+    response = await register(username, email, password)
+
+    if response.status_code == 201:
+        await update.message.reply_text(
+            "✅ Registration successful.\nYou can now login using /login"
+        )
+        return
+
+    if response.status_code == 400:
+        await update.message.reply_text(
+            "⚠️ User with that email or username already exists"
+        )
+        return
+
+    await update.message.reply_text(
+        f"❌ Registration failed ({response.status_code})"
+    )

@@ -1,7 +1,7 @@
 from telegram.ext import ApplicationBuilder, CommandHandler
 
 from config import TOKEN
-from handlers.auth import login_command, logout_command
+from handlers.auth import login_command, logout_command, register_command
 from handlers.common import say_hello
 from handlers.tasks import get_tasks, add_task, update_task
 
@@ -18,6 +18,7 @@ def main():
     application.add_handler(CommandHandler("tasks", get_tasks))
     application.add_handler(CommandHandler("addtask", add_task))
     application.add_handler(CommandHandler("updatetask", update_task))
+    application.add_handler(CommandHandler("register", register_command))
 
     application.run_polling()
 

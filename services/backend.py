@@ -60,3 +60,18 @@ async def login(email: str, password: str) -> str | None:
         return None
 
     return response.json().get("access_token")
+
+async def register(username: str, email: str, password: str):
+    """
+    Registers a new user in the backend.
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{BACKEND_URL}/users/register",
+            json={
+                "username": username,
+                "email": email,
+                "password": password
+            }
+        )
+    return response
