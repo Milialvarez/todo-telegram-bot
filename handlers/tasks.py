@@ -4,7 +4,8 @@ from telegram.ext import ContextTypes
 from services.backend import (
     fetch_my_tasks,
     create_task,
-    update_task_status
+    service_delete_task,
+    update_task_status,
 )
 from utils.auth import get_auth_headers
 from sessions import user_sessions
@@ -41,7 +42,7 @@ async def get_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = "📋 *Your tasks:*\n\n"
     for task in tasks:
-        message += f"• [{task['id']}] {task['title']} — _{task['status']}_\n"
+        message += f"• [{task['id']}] {task['title']} — {task['description']} — {task['status']}\n"
 
     await update.message.reply_text(message)
 
@@ -133,3 +134,34 @@ async def update_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("✅ Task updated successfully")
     else:
         await update.message.reply_text("❌ Failed to update task")
+
+async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    telegram_user_id = update.effective_user.id
+    headers = get_auth_headers(telegram_user_id)
+
+    if not headers:
+        await update.message.reply_text("🔒 Please login first")
+        return
+
+    """
+    Deletes a task by its ID.
+    Usage: /deletetask <task_id>
+    Example: /deletetask 2
+    """
+
+    try:
+        task_id = int(context.args[0])
+    except ValueError:
+        await update.message.reply_text("Task id must be a number")
+        return
+    
+    success = await service_delete_task(task_id, headers)
+
+    if success:
+        await update.message.reply_text(f"✅ Task with ID {task_id} successfully deleted")
+
+    else:
+        await update.message.reply_text("❌ Failed to update task")
+    
+
+

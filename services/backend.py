@@ -75,3 +75,23 @@ async def register(username: str, email: str, password: str):
             }
         )
     return response
+
+async def service_delete_task(task_id: int, headers: dict) -> bool:
+    """
+    Calls the fastapi backend to delete a task by id
+    
+    :param task_id: id for the task that's going to be deleted
+    :type task_id: int
+    :return: task succesfully deleted or error during the operation
+    :rtype: bool
+    """
+
+    async with httpx.AsyncClient() as client:
+        response = await client.delete(
+            f"{BACKEND_URL}/tasks/{task_id}",
+            headers=headers
+        )
+
+    return response
+
+
