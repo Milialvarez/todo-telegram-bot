@@ -24,13 +24,14 @@ async def create_task(payload: dict, headers: dict):
         )
     return response
 
-async def update_task_status(task_id: int, status: str, headers: dict) -> bool:
-    """
-    Send the proper dto expected in my fastapi backend
-    """
+async def update_task_data(
+    task_id: int,
+    data: dict,
+    headers: dict
+) -> bool:
     payload = {
         "task_id": task_id,
-        "status": status
+        **data
     }
 
     async with httpx.AsyncClient() as client:
@@ -41,6 +42,7 @@ async def update_task_status(task_id: int, status: str, headers: dict) -> bool:
         )
 
     return response.status_code == 200
+
 
 async def login(email: str, password: str) -> str | None:
     """

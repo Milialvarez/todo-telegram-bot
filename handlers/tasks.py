@@ -5,7 +5,7 @@ from services.backend import (
     fetch_my_tasks,
     create_task,
     service_delete_task,
-    update_task_status,
+    update_task_data,
 )
 from utils.auth import get_auth_headers
 from sessions import user_sessions
@@ -96,44 +96,67 @@ async def update_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_user_id = update.effective_user.id
     headers = get_auth_headers(telegram_user_id)
 
-    """
-    Updates the status of a task by its ID.
-    Usage: /updatetask <task_id> <status>
-    Example: /updatetask 5 completed
-    """
-
     if not headers:
         await update.message.reply_text("🔒 Please login first")
         return
 
     if len(context.args) < 2:
         await update.message.reply_text(
-            "Usage:\n/updatetask <task_id> <status>"
+            "Usage:\n/updatetask <task_id> <title> | <description> | <status>"
         )
         return
+    
+    """
+    Updates a task by its ID
+    Usage examples: /updatetask 5 title | | completed
+                    /updatetask 5 | desc |
+                    /updatetask 5 title | desc |
+                    /updatetask 5 | | completed
+                    /updatetask 5 title | |
+    """
 
     try:
         task_id = int(context.args[0])
+        raw_text = " ".join(context.args[1:])
+        parts = [p.strip() for p in raw_text.split("|")]
     except ValueError:
         await update.message.reply_text("Task id must be a number")
         return
 
-    status = context.args[1].lower()
+    payload = {}
 
-    valid_statuses = {"pending", "in_progress", "completed"}
+    # title
+    if len(parts) > 0 and parts[0]:
+        payload["title"] = parts[0]
 
-    if status not in valid_statuses:
-        await update.message.reply_text(
-            "Invalid status. Allowed values: pending, in_progress, completed"
-        )
+    # description
+    if len(parts) > 1 and parts[1]:
+        payload["description"] = parts[1]
+
+    # status
+    if len(parts) > 2 and parts[2]:
+        status = parts[2].lower()
+        valid_statuses = {"pending", "in_progress", "completed"}
+
+        if status not in valid_statuses:
+            await update.message.reply_text(
+                "Invalid status. Allowed values: pending, in_progress, completed"
+            )
+            return
+
+        payload["status"] = status
+
+    if not payload:
+        await update.message.reply_text("❌ No fields to update")
         return
 
-    success = await update_task_status(task_id, status, headers)
+    success = await update_task_data(task_id, payload, headers)
 
     if success:
         await update.message.reply_text("✅ Task updated successfully")
     else:
         await update.message.reply_text("❌ Failed to update task")
+
 
 async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_user_id = update.effective_user.id
