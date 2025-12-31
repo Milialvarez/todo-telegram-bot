@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler
 from config import TOKEN
 from handlers.auth import login_command, logout_command, register_command
 from handlers.common import say_hello
-from handlers.reminders import add_reminder, get_reminders
+from handlers.reminders import add_reminder, delete_reminder, get_reminders, update_reminder
 from handlers.tasks import delete_task, get_tasks, add_task, update_task
 
 def main():
@@ -30,6 +30,8 @@ def main():
 
     application.add_handler(CommandHandler("reminders", get_reminders))
     application.add_handler(CommandHandler("addreminder", add_reminder))
+    application.add_handler(CommandHandler("updatereminder", update_reminder))
+    application.add_handler(CommandHandler("deletereminder", delete_reminder))
 
     application.run_polling()
 

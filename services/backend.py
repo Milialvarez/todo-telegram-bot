@@ -130,3 +130,40 @@ async def create_reminder(payload: dict, headers: dict):
             headers=headers
         )
     return response
+
+async def update_reminder_service(payload: dict, headers: dict):
+    """
+    Docstring for update_reminder_service
+    
+    :param payload: data required to update a reminder with the reminder id and at least another field (date, description)
+    :type payload: dict
+    :param headers: authorization headers to authenticate the user and authorize the operation
+    :type headers: dict
+    """
+
+    async with httpx.AsyncClient() as client:
+        response = await client.put(
+            f"{BACKEND_URL}/reminders/",
+            json=payload,
+            headers=headers
+        )
+
+    return response.status_code == 200
+
+async def service_delete_reminder(rem_id: int, headers: dict):
+    """
+    Docstring for service_delete_reminder
+    
+    :param rem_id: reminder ID to get the reminder that's going to be deleted
+    :type rem_id: int
+    :param headers: authorization headers to authenticate the user and authorize the operation
+    :type headers: dict
+    """
+
+    async with httpx.AsyncClient() as client:
+        response = await client.delete(
+            f"{BACKEND_URL}/reminders/{rem_id}",
+            headers=headers,
+        )
+
+    return response
