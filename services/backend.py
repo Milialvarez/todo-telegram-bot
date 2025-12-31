@@ -96,4 +96,37 @@ async def service_delete_task(task_id: int, headers: dict) -> bool:
 
     return response
 
+async def fetch_my_reminders(headers:dict):
+    """
+    Docstring for fetch_my_reminders
+    
+    :param headers: authentication headers, required field to authenticate user
+    :type headers: dict
+    """
 
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{BACKEND_URL}/reminders/me",
+            headers=headers
+        )
+
+    return response
+
+
+async def create_reminder(payload: dict, headers: dict):
+    """
+    Sends a request to create a new reminder.
+
+    :param headers: authentication headers, required field to authenticate user
+    :type headers: dict
+
+    :payload: data for the reminder creation
+    :type payload: json
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{BACKEND_URL}/reminders/",
+            json=payload,
+            headers=headers
+        )
+    return response
