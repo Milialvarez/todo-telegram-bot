@@ -37,7 +37,6 @@ def main():
 
     application.add_handler(CommandHandler("help", get_usages))
 
-
     application.run_polling()
 
 if __name__ == "__main__":
